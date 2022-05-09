@@ -2,66 +2,57 @@ package me.pyhlo;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
+import com.google.gson.JsonElement;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.geometry.Point2D;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Slider;
 import javafx.scene.input.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
-import javafx.scene.media.MediaErrorEvent;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Arc;
-import javafx.scene.shape.ArcType;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
-import javafx.util.Duration;
 import me.pyhlo.Events.KeyEvents;
 
 public class Main extends Application {
-    /*Media media;
+    public static Checkpoint checkpoint = new Checkpoint();
 
-    {
-        try {
-            media = new Media(new File(new File(".").getCanonicalPath() + "\\runme.mp4").toURI().toURL().toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
+    public static Media media;
+    public static MediaPlayer player;
+
+    private static double startpoint;
+    private static double endpoint;
 
     public static boolean paused = false;
 
     public static void main(String[] args) {
-        System.out.println("Main!");
+        checkpoint.setIndex(0);
+        startpoint = checkpoint.getStartpoint();
+        endpoint = checkpoint.getEndpoint();
         launch(args);
     }
 
+    double currentTimePause = 0.0;
+
     @Override
-    public void start(Stage stage) throws IOException, InterruptedException, ExecutionException {
+    public void start(Stage stage) throws IOException {
         System.out.println("Starting \"sidste skoledags\" video, please stand by...");
         File f = new File(new File(".").getCanonicalPath() + "\\runme.mp4");
-        Media media = new Media(f.toURI().toURL().toString());
+        File j = new File(new File(".").getCanonicalPath() + "\\checkpoints.json");
+        if (!j.exists()) {
+            System.out.println("No checkpoints.json file found.");
+            return;
+        } if (!f.exists()) {
+            System.out.println("No runme.mp4 file found.");
+            return;
+        }
+        //JsonElement json = Utils.getJsonText(j);
+        //double first = Utils.getNext(currentTimePause, json);
+        media = new Media(f.toURI().toURL().toString());
         //System.out.println("Length of video: " + media.durationProperty().getValue().toSeconds() + " seconds");
-        MediaPlayer player = new MediaPlayer(media);
+        player = new MediaPlayer(media);
 
         MediaView view = new MediaView(player);
 
@@ -97,11 +88,32 @@ public class Main extends Application {
     public static class Multithreading extends Thread{
         public void run() {
             try {
-                sleep(2000);
-                System.out.println("ETER 2000 MILLISECONDS????");
+                sleep(200);
+                double current = player.getCurrentTime().toMillis();
+                System.out.println(current);
+                if (current >= endpoint) {
+                    WaitForCommand obj = new WaitForCommand();
+                    obj.start();
+                } else {
+                    Multithreading obj = new Multithreading();
+                    obj.start();
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public static class WaitForCommand extends Thread {
+        public void run() {
+            try {
+                sleep(200);
+                double current = player.getCurrentTime().toMillis();
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
