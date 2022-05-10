@@ -18,7 +18,7 @@ public class Utils {
         return 200;
     }
 
-    public static JsonElement getJsonText(File file) throws IOException {
+    public static JsonElement getElement(File file) throws IOException {
         InputStream is = new FileInputStream(file);
         String text = IOUtils.toString(is, StandardCharsets.UTF_8);
         Gson gson = new GsonBuilder().create();

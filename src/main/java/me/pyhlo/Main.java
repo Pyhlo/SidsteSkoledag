@@ -17,20 +17,33 @@ import javafx.stage.Stage;
 import me.pyhlo.Events.KeyEvents;
 
 public class Main extends Application {
-    public static Checkpoint checkpoint = new Checkpoint();
+    public static Checkpoint checkpoint;
 
     public static Media media;
     public static MediaPlayer player;
 
-    private static double startpoint;
-    private static double endpoint;
+    public static File f;
+    public static File j;
+
+    //private static double startpoint;
+    //private static double endpoint;
 
     public static boolean paused = false;
 
-    public static void main(String[] args) {
-        checkpoint.setIndex(0);
-        startpoint = checkpoint.getStartpoint();
-        endpoint = checkpoint.getEndpoint();
+    public static boolean waitForCommand = false;
+
+    public static void main(String[] args) throws IOException {
+        f = new File(new File(".").getCanonicalPath() + "\\runme.mp4");
+        j = new File(new File(".").getCanonicalPath() + "\\checkpoints.json");
+        if (!j.exists()) {
+            System.out.println("No checkpoints.json file found.");
+            return;
+        } if (!f.exists()) {
+            System.out.println("No runme.mp4 file found.");
+            return;
+        }
+        checkpoint = new Checkpoint(j, 0);
+
         launch(args);
     }
 
@@ -39,15 +52,6 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         System.out.println("Starting \"sidste skoledags\" video, please stand by...");
-        File f = new File(new File(".").getCanonicalPath() + "\\runme.mp4");
-        File j = new File(new File(".").getCanonicalPath() + "\\checkpoints.json");
-        if (!j.exists()) {
-            System.out.println("No checkpoints.json file found.");
-            return;
-        } if (!f.exists()) {
-            System.out.println("No runme.mp4 file found.");
-            return;
-        }
         //JsonElement json = Utils.getJsonText(j);
         //double first = Utils.getNext(currentTimePause, json);
         media = new Media(f.toURI().toURL().toString());
@@ -91,9 +95,13 @@ public class Main extends Application {
                 sleep(200);
                 double current = player.getCurrentTime().toMillis();
                 System.out.println(current);
-                if (current >= endpoint) {
-                    WaitForCommand obj = new WaitForCommand();
-                    obj.start();
+                if (current >= checkpoint.endpoint) {
+                    if (checkpoint.type.equalsIgnoreCase("stop")) {
+                        player.pause();
+                        waitForCommand = true;
+                        //WaitForCommand obj = new WaitForCommand();
+                        //obj.start();
+                    }
                 } else {
                     Multithreading obj = new Multithreading();
                     obj.start();
