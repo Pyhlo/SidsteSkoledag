@@ -54,8 +54,6 @@ public class Main extends Application {
         launch(args);
     }
 
-    double currentTimePause = 0.0;
-
     @Override
     public void start(Stage stage) throws IOException {
         System.out.println("Starting \"sidste skoledags\" video, please stand by...");
