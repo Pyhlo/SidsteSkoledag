@@ -16,6 +16,11 @@ import javafx.scene.media.MediaView;
 import javafx.stage.Stage;
 import me.pyhlo.Events.KeyEvents;
 
+/*
+TODO:
+- Make another program (exactly the same as this, but it's starting checkpoint is lastCheckpoint.txt's checkpoint)
+ */
+
 public class Main extends Application {
     public static Checkpoint checkpoint;
 
@@ -31,6 +36,8 @@ public class Main extends Application {
     public static boolean paused = false;
 
     public static boolean waitForCommand = false;
+
+    public static Multithreading currentThread;
 
     public static void main(String[] args) throws IOException {
         f = new File(new File(".").getCanonicalPath() + "\\runme.mp4");
@@ -73,8 +80,8 @@ public class Main extends Application {
             stage.close();
             System.out.println("DONE!");
         });
-        Multithreading obj = new Multithreading();
-        obj.start();
+        currentThread = new Multithreading();
+        currentThread.start();
 
         //MAKE THIS SHIT WORK WITHOUT DISTURBING THE MAIN LOOP
         /*Future<Integer> future = waitForCheckpoint(5000);
@@ -99,29 +106,21 @@ public class Main extends Application {
                     if (checkpoint.type.equalsIgnoreCase("stop")) {
                         player.pause();
                         waitForCommand = true;
-                        //WaitForCommand obj = new WaitForCommand();
-                        //obj.start();
+                        if (checkpoint.hasAudio) {
+                            Sound.play(checkpoint.songpath);
+                        }
+                        //send to server console
+                    } else if (checkpoint.type.equalsIgnoreCase("repeating")) {
+                        System.out.println("repeating??");
+                        //send to server console
                     }
                 } else {
-                    Multithreading obj = new Multithreading();
-                    obj.start();
+                    currentThread = new Multithreading();
+                    currentThread.start();
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    public static class WaitForCommand extends Thread {
-        public void run() {
-            try {
-                sleep(200);
-                double current = player.getCurrentTime().toMillis();
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
         }
     }
 

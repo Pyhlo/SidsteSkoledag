@@ -6,6 +6,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import me.pyhlo.Main;
+import me.pyhlo.Sound;
 
 import java.io.IOException;
 
@@ -22,9 +23,13 @@ public class KeyEvents {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    /*Main.Multithreading obj = new Main.Multithreading();
-                    obj.start();*/
+                    Main.currentThread = new Main.Multithreading();
+                    Main.currentThread.start();
+                    if (Sound.isPlaying) {
+                        Sound.stop();
+                    }
                     System.out.println("NEXT!");
+                    //send to server console
                 }
             }
 
@@ -40,10 +45,16 @@ public class KeyEvents {
                     if (Main.paused) {
                         player.play();
                         System.out.println("RESUME!");
+                        if (Sound.isPlaying) {
+                            Sound.resume();
+                        }
                         Main.paused = false;
                     } else {
                         player.pause();
                         System.out.println("PAUSE!");
+                        if (Sound.isPlaying) {
+                            Sound.pause();
+                        }
                         Main.paused = true;
                     }
                 }

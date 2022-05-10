@@ -4,53 +4,54 @@ import com.google.gson.JsonObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.time.Duration;
+import java.io.PrintWriter;
 
 public class Checkpoint {
     public int index;
-    private int maxIndexes;
     public String songpath;
     public String type;
+
+    public boolean hasAudio;
 
     public double startpoint;
     public double endpoint; //the double is in millieseconds
 
+    private PrintWriter writer = new PrintWriter("lastCheckpoint.txt", "UTF-8");
+
     public Checkpoint(File f, int starting_index) throws IOException {
         index = starting_index;
         JsonObject obj = Utils.getElement(f).getAsJsonObject();
-        maxIndexes = obj.size();
         JsonObject inObj = obj.get(String.valueOf(index)).getAsJsonObject();
+        System.out.println("Starting checkpoint 0...\nNumber of checkpoints: " + obj.size());
         type = inObj.get("type").getAsString();
-        if (type.equalsIgnoreCase("stop")) {
-            endpoint = inObj.get("end").getAsDouble();
-            songpath = inObj.get("songpath").getAsString();
-        } else {
+        if (!type.equalsIgnoreCase("stop")) {
             startpoint = inObj.get("start").getAsDouble();
-            endpoint = inObj.get("end").getAsDouble();
-            songpath = inObj.get("songpath").getAsString();
         }
+        endpoint = inObj.get("end").getAsDouble();
+        songpath = inObj.get("songpath").getAsString();
+        hasAudio = !songpath.equals("null");
     }
 
     public int next() throws IOException { //returns & switches to the next checkpoint
         index++;
         System.out.println("next " + index);
-        JsonObject obj = Utils.getElement(Main.f).getAsJsonObject();
-        System.out.println("before inObj init");
-        JsonObject inObj = obj.get(String.valueOf(index)).getAsJsonObject();
-        System.out.println("before type");
-        type = inObj.get("type").getAsString();
-        System.out.println("still works");
-        if (type.equalsIgnoreCase("stop")) {
-            System.out.println("choose type 'stop'");
+        writer.println(index);
+        try {
+            JsonObject obj = Utils.getElement(Main.j).getAsJsonObject();
+            JsonObject inObj = obj.get(String.valueOf(index)).getAsJsonObject();
+            type = inObj.get("type").getAsString();
+            if (!type.equalsIgnoreCase("stop")) {
+                startpoint = inObj.get("start").getAsDouble();
+            }
             endpoint = inObj.get("end").getAsDouble();
             songpath = inObj.get("songpath").getAsString();
-        } else {
-            startpoint = inObj.get("start").getAsDouble();
-            endpoint = inObj.get("end").getAsDouble();
-            songpath = inObj.get("songpath").getAsString();
+            hasAudio = !songpath.equals("null");
+            return index;
+        } catch (NullPointerException err) {
+            System.out.println("No more checkpoints!");
+            Main.currentThread.interrupt();
         }
-        return index;
+        return -1;
     }
 
     public int previous() { //returns & switches to the previous checkpoint

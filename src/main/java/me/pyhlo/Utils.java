@@ -19,6 +19,7 @@ public class Utils {
     }
 
     public static JsonElement getElement(File file) throws IOException {
+        System.out.println("getting element: " + file.getCanonicalPath());
         InputStream is = new FileInputStream(file);
         String text = IOUtils.toString(is, StandardCharsets.UTF_8);
         Gson gson = new GsonBuilder().create();
