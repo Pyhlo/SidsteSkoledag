@@ -3,6 +3,7 @@ package me.pyhlo;
 import com.google.gson.JsonObject;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -16,7 +17,7 @@ public class Checkpoint {
     public double startpoint;
     public double endpoint; //the double is in millieseconds
 
-    private PrintWriter writer = new PrintWriter("lastCheckpoint.txt", "UTF-8");
+    private final PrintWriter writer = new PrintWriter(new FileOutputStream("lastCheckpoint.txt", false));
 
     public Checkpoint(File f, int starting_index) throws IOException {
         index = starting_index;
@@ -35,7 +36,8 @@ public class Checkpoint {
     public int next() throws IOException { //returns & switches to the next checkpoint
         index++;
         System.out.println("next " + index);
-        writer.println(index);
+        writer.write(String.valueOf(index));
+        writer.flush();
         try {
             JsonObject obj = Utils.getElement(Main.j).getAsJsonObject();
             JsonObject inObj = obj.get(String.valueOf(index)).getAsJsonObject();
@@ -46,6 +48,7 @@ public class Checkpoint {
             endpoint = inObj.get("end").getAsDouble();
             songpath = inObj.get("songpath").getAsString();
             hasAudio = !songpath.equals("null");
+            System.out.println("next id: " + index + "\nstart: " + startpoint + "\nend: " + endpoint + "\ntype: " + type);
             return index;
         } catch (NullPointerException err) {
             System.out.println("No more checkpoints!");

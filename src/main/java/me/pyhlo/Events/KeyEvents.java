@@ -16,19 +16,42 @@ public class KeyEvents {
             // Forward the video towards the next checkpoint
             if (event.getCode() == KeyCode.SPACE || event.getCode() == KeyCode.RIGHT || event.getCode() == KeyCode.ENTER) {
                 if (Main.waitForCommand) {
-                    Main.waitForCommand = false;
-                    Main.player.play();
-                    try {
-                        Main.checkpoint.next();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    //System.out.println("indtil videre");
+                    if (!Main.cutto) {
+                        Main.waitForCommand = false;
+                        Main.player.play();
+                        try {
+                            Main.checkpoint.next();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        Main.currentThread = new Main.Multithreading();
+                        Main.currentThread.start();
+                        if (Sound.isPlaying) {
+                            Sound.stop();
+                        }
+                        System.out.println("NEXT!");
+                    } else {
+                        Main.waitForCommand = false;
+                        Main.cutto = false;
+                        double endpoint = Main.checkpoint.endpoint;
+                        Main.player.seek(new javafx.util.Duration(endpoint));
+                        if (Sound.isPlaying) {
+                            Sound.stop();
+                        }
+                        if (Main.player.getStatus() == MediaPlayer.Status.PAUSED) {
+                            Main.player.play();
+                        }
+                        System.out.println("Skipping to endpoint: " + endpoint);
+                        try {
+                            Main.checkpoint.next();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        Main.currentThread = new Main.Multithreading();
+                        Main.currentThread.start();
+                        System.out.println("CUTTO!");
                     }
-                    Main.currentThread = new Main.Multithreading();
-                    Main.currentThread.start();
-                    if (Sound.isPlaying) {
-                        Sound.stop();
-                    }
-                    System.out.println("NEXT!");
                     //send to server console
                 }
             }

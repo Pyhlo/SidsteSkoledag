@@ -36,6 +36,7 @@ public class Main extends Application {
     public static boolean paused = false;
 
     public static boolean waitForCommand = false;
+    public static boolean cutto = false;
 
     public static Multithreading currentThread;
 
@@ -97,21 +98,33 @@ public class Main extends Application {
     public static class Multithreading extends Thread{
         public void run() {
             try {
+                System.out.println("running thread");
                 sleep(200);
                 double current = player.getCurrentTime().toMillis();
                 System.out.println(current);
                 if (current >= checkpoint.endpoint) {
                     if (checkpoint.type.equalsIgnoreCase("stop")) {
                         player.pause();
+                        //player.seek(new javafx.util.Duration(4500)); //this shit will force it to fastfoward yeah yeah
                         waitForCommand = true;
                         if (checkpoint.hasAudio) {
                             Sound.play(checkpoint.songpath);
                         }
                         //send to server console
-                    } else if (checkpoint.type.equalsIgnoreCase("repeating")) {
-                        System.out.println("repeating??");
-                        //send to server console
                     }
+                } else if (checkpoint.type.equalsIgnoreCase("cutto")) {
+                    if (current >= checkpoint.startpoint) {
+                        cutto = true;
+                        waitForCommand = true;
+                        if (checkpoint.hasAudio) {
+                            Sound.play(checkpoint.songpath);
+                        }
+                        System.out.println("cutto??");
+                    } else {
+                        currentThread = new Multithreading();
+                        currentThread.start();
+                    }
+                    //send to server console
                 } else {
                     currentThread = new Multithreading();
                     currentThread.start();
